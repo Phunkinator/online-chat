@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Chat</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    {% if not nickname %}
+        <form action="/set_nickname" method="post">
+            <label for="nickname">Enter your nickname:</label>
+            <input type="text" id="nickname" name="nickname" required>
+            <button type="submit">Join Chat</button>
+        </form>
+    {% else %}
+        <div id="chat"></div>
+        <input type="text" id="message" placeholder="Type your message here...">
+        <button onclick="sendMessage()">Send</button>
+        <script>
+            var socket = io();
+            var nickname = "{{ nickname }}";
+
+            function sendMessage() {
+                var message = $('#message').val();
+                socket.emit('send_message', {nickname: nickname, message: message});
+                $('#message').val('');
+            }
+
+            socket.on('receive_message', function(data) {
+                $('#chat').append('<p><strong>' + data.nickname + ':</strong> ' + data.message + '</p>');
+            });
+        </script>
+    {% endif %}
+</body>
+</html>
